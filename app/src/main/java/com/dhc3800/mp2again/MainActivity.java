@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.support.v7.widget.SearchView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,11 +17,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<Pokemon> pokemonList = new ArrayList<>();
+    private final ArrayList<Pokemon> masterList = new ArrayList<>();
+    private android.widget.SearchView searchView;
 
 
     @Override
@@ -28,14 +32,52 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initPok();
         recyclerView = findViewById(R.id.recycleView);
+
+
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
         mAdapter = new PokemonAdapter(pokemonList);
         recyclerView.setAdapter(mAdapter);
 
-        TextView textView3 = findViewById(R.id.textView3);
-        textView3.setText("This is a test");
+
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu,menu);
+        final MenuItem searchItem = menu.findItem(R.id.hehexd);
+        final SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(this);
+        return true;
+
+    }
+
+    @Override
+    public boolean onQueryTextChange(String query) {
+        filter(query);
+        mAdapter.notifyDataSetChanged();
+        return true;
+
+    }
+    @Override
+    public boolean onQueryTextSubmit (String query) {
+        filter(query);
+        mAdapter.notifyDataSetChanged();
+        return true;
+    }
+
+
+
+    public void filter(String input) {
+        ArrayList<Pokemon> temp = new ArrayList<>();
+        pokemonList.clear();
+        for (Pokemon p: masterList) {
+            if (p.getName().contains(input) || Integer.toString(p.getId()).contains(input)) {
+                pokemonList.add(p);
+            }
+        }
     }
     public void initPok() {
         try {
@@ -55,11 +97,11 @@ public class MainActivity extends AppCompatActivity {
                     int spdef = Integer.parseInt(obj.getString("Sp. Def").trim());
                     int speed = Integer.parseInt(obj.getString("Speed").trim());
                     int total = Integer.parseInt(obj.getString("Total").trim());
-                    String ft = obj.getString("Flavor Text").trim();
+                    String ft = obj.getString("FlavorText").trim();
                     String[] typesArr = arr.toString().replace("},{", " ,").split(" ");
                     String species = obj.getString("Species").trim();
-
-                    pokemonList.add(new Pokemon(name, number));
+                    pokemonList.add(new Pokemon(name, number, defense, attack, hp, typesArr, spatk, spdef, speed, species, total, ft));
+                    masterList.add(new Pokemon(name, number, defense, attack, hp, typesArr, spatk, spdef, speed, species, total, ft));
                 }
             }
 
