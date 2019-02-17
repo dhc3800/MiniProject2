@@ -81,7 +81,7 @@ public class searchCategory extends AppCompatActivity implements View.OnClickLis
         next.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 Intent myIntent = new Intent(searchCategory.this,
-                        MainActivity.class); // change this to grid view
+                        DisplayList.class); // change this to grid view
 
 
                 // these are sent to next screen
@@ -89,10 +89,11 @@ public class searchCategory extends AppCompatActivity implements View.OnClickLis
                 int attack = Integer.parseInt(aF.getText().toString());
                 int defense = Integer.parseInt(dF.getText().toString());
                 int hp = Integer.parseInt(hpF.getText().toString());
+                myIntent.putExtra("random", false);
 
                 myIntent.putExtra("types", types);
-                myIntent.putExtra("atk", attack);
-                myIntent.putExtra("def", defense);
+                myIntent.putExtra("attack", attack);
+                myIntent.putExtra("defense", defense);
                 myIntent.putExtra("hp", hp);
                 // add intent for filtered pokemon
 

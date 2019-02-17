@@ -1,15 +1,11 @@
 package com.dhc3800.mp2again;
 
-
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.support.v7.widget.SearchView;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 
@@ -20,77 +16,57 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
-    private RecyclerView recyclerView;
-    private Button category;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
+public class DisplayList extends AppCompatActivity {
     private ArrayList<Pokemon> pokemonList = new ArrayList<>();
     private final ArrayList<Pokemon> masterList = new ArrayList<>();
-    private android.widget.SearchView searchView;
-
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
+    private Button leave;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_display_list);
+        leave = findViewById(R.id.button3);
+        leave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent  = new Intent(DisplayList.this, searchCategory.class);
+                startActivity(intent);
+            }
+        });
+
+
         initPok();
+        Bundle b = getIntent().getExtras();
+//        boolean isRandom = b.getBoolean("random");
+//        if (isRandom) {
+//            // do random stuff
+//        } else {
+        ArrayList<String> types = b.getStringArrayList("types");
+        int attack = b.getInt("attack", 0);
+        int defense = b.getInt("defense", 0);
+        int hp = b.getInt("hp", 0);
+        pokemonList = filterCategories(types, attack,defense, hp);
+
+
         recyclerView = findViewById(R.id.recycleView);
 
 
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        mAdapter = new PokemonAdapter(pokemonList);
+        mAdapter = new DisplayAdapter(pokemonList);
         recyclerView.setAdapter(mAdapter);
 
-        category = findViewById(R.id.category);
-        category.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this, searchCategory.class);
-                startActivity(i);
-            }
-        });
-
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu,menu);
-        final MenuItem searchItem = menu.findItem(R.id.hehexd);
-        final SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setOnQueryTextListener(this);
-        return true;
-
-    }
-
-    @Override
-    public boolean onQueryTextChange(String query) {
-        filter(query);
-        mAdapter.notifyDataSetChanged();
-        return true;
-
-    }
-    @Override
-    public boolean onQueryTextSubmit (String query) {
-        filter(query);
-        mAdapter.notifyDataSetChanged();
-        return true;
-    }
 
 
 
-    public void filter(String input) {
-        ArrayList<Pokemon> temp = new ArrayList<>();
-        pokemonList.clear();
-        for (Pokemon p: masterList) {
-            if (p.getName().contains(input) || Integer.toString(p.getId()).contains(input)) {
-                pokemonList.add(p);
-            }
-        }
-    }
+
     public void initPok() {
         try {
             //JSONObject jsonObject = new JSONObject(data);
@@ -122,6 +98,79 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             Log.i("JSON error", "Parse error");
             System.out.println("RIP");
         }
+
+    }
+    public ArrayList<Pokemon> filterAttack(ArrayList<Pokemon> plist, int a) {
+        if (plist.isEmpty()) {
+            return plist;
+        }
+        ArrayList<Pokemon> temp = new ArrayList<>();
+        for (Pokemon p : plist) {
+            if (p.getAttack() >= a) {
+                temp.add(p);
+            }
+        }
+        return temp;
+    }
+
+    public ArrayList<Pokemon> filterDefense(ArrayList<Pokemon> plist, int d) {
+        if (plist.isEmpty()) {
+            return plist;
+        }
+
+        ArrayList<Pokemon> temp = new ArrayList<>();
+        for (Pokemon p : plist) {
+            if (p.getDefense() >= d) {
+                temp.add(p);
+            }
+        }
+        return temp;
+    }
+
+    public ArrayList<Pokemon> filterHP(ArrayList<Pokemon> plist, int hp) {
+        if (plist.isEmpty()) {
+            return plist;
+        }
+        ArrayList<Pokemon> temp = new ArrayList<>();
+        for (Pokemon p : plist) {
+            if (p.getHP() >= hp) {
+                temp.add(p);
+            }
+        }
+        return temp;
+    }
+
+
+
+    public ArrayList<Pokemon> filterTypes(ArrayList<Pokemon> plist, ArrayList<String> types) {
+        if (plist.isEmpty()) {
+            return plist;
+        }
+
+        ArrayList<Pokemon> temp = new ArrayList<>();
+
+        for (Pokemon p : plist) {
+            String[] ptypes =  p.getTypes();
+            for (String ptype : ptypes) {
+                for (String t : types) {
+                    if (ptype.equals(t) && !temp.contains(p)) {
+                        temp.add(p);
+                    }
+                }
+            }
+
+        }
+        return temp;
+    }
+
+    // calls all filter functions
+    public ArrayList<Pokemon> filterCategories(ArrayList<String> types, int a, int d, int hp) {
+        ArrayList<Pokemon> temp = new ArrayList<>();
+        temp = filterAttack(masterList, a);
+        temp = filterDefense(temp, d);
+        temp = filterHP(temp, hp);
+        temp = filterTypes(temp, types);
+        return temp;
 
     }
 }

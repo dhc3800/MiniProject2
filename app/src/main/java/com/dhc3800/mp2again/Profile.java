@@ -8,6 +8,8 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,6 +22,7 @@ public class Profile extends AppCompatActivity {
     TextView nameTV;
     TextView v1;
     TextView v2;
+    Button leave;
 
 
     @Override
@@ -28,6 +31,14 @@ public class Profile extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         Bundle b = getIntent().getExtras();
         String name = b.getString("name");
+        leave = findViewById(R.id.button4);
+        leave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Profile.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
 
         img = findViewById(R.id.pokemonimage);
         Glide.with(img.getContext()).load("http://img.pokemondb.net/artwork/" + name.toLowerCase() + ".jpg").centerCrop().into(img);
